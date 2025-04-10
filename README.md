@@ -30,7 +30,7 @@ On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
 ```json
 {
   "mcpServers": {
-    "302ai-browser-use-mcp": {
+    "302ai-file-parser-mcp": {
       "command": "npx",
       "args": ["-y", "@302ai/file-parser-mcp"],
       "env": {

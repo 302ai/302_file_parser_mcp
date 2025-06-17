@@ -38,9 +38,12 @@ class AI302Api {
   }
 
   async listTools(): Promise<Tool[]> {
+    const url = new URL(`${this.baseUrl}/v1/tool/list`);
+    url.searchParams.append("packId", "fileTools");
+    url.searchParams.append("user302", "user302");
     const { data, error } = await betterFetch<{
       tools: Tool[];
-    }>(`${this.baseUrl}/list-tools/file`, {
+    }>(url.toString(), {
       headers: {
         Authorization: `Bearer ${this.apiKey}`,
       },
@@ -57,8 +60,8 @@ class AI302Api {
   }
 
   async callTool(name: string, arguments_: any): Promise<ToolCallResponse> {
-    const { data, error } = await betterFetch<ToolCallResponse>(
-      `${this.baseUrl}/call-tool/${name}`,
+    const { data, error } = await betterFetch<any>(
+      `${this.baseUrl}/v1/tool/call`,
       {
         method: "POST",
         headers: {
@@ -66,6 +69,7 @@ class AI302Api {
           "x-api-key": this.apiKey,
         },
         body: {
+          nameOrId: name,
           arguments: arguments_,
         },
       },
@@ -90,7 +94,7 @@ class AI302Server {
     this.server = new Server(
       {
         name: "302ai-file-parser-mcp",
-        version: "0.1.0",
+        version: "0.1.2",
       },
       {
         capabilities: {
@@ -148,7 +152,7 @@ class AI302Server {
 
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const api = this.getApiInstance(request);
-      const { result, logs } = await api.callTool(
+      const content = await api.callTool(
         request.params.name,
         request.params.arguments,
       );
@@ -157,7 +161,7 @@ class AI302Server {
         content: [
           {
             type: "text",
-            text: JSON.stringify({ result, logs }, null, 2),
+            text: JSON.stringify({ content }, null, 2),
           },
         ],
       };
